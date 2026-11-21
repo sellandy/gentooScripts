@@ -9,9 +9,8 @@ echo "0) quit"
 echo "1) efibootmgr drucken"
 echo "2) Gentoo EFI schreiben"
 echo "3) Windows EFI schreiben"
-echo "4) Kernel signieren und in den EFI-Ordner kopieren"
-echo "5) Copy initramfs to EFI"
-echo "6) Install and sign grub - grubx64.efi"
+echo "4) Install and sign grub - grubx64.efi"
+echo "5) Sign Kernel in /boot"
 
 read -p "Ihre Auswahl: " auswahl
 
@@ -41,31 +40,7 @@ case $auswahl in
         echo "Windows EFI schreiben"
         efibootmgr -c -d /dev/nvme1n1 -p3 -L "Windows 11 Pro" --loader '\EFI\MICROSOFT\BOOT\BOOTMGFW.EFI'
         ;;
-    4)
-        echo "Kernel signieren und in den EFI-Ordner kopieren"
-        if [ -f /usr/src/linux/arch/x86/boot/bzImage ]; then
-            cp /usr/src/linux/arch/x86/boot/bzImage /efi/EFI/gentoo/bzImage.efi
-            echo \"bzImage wurde erfolgreich nach /efi/EFI/gentoo/bzImage.efi kopiert.\"
-	    sbsign --key $SECUREBOOT_SIGN_KEY --cert $SECUREBOOT_SIGN_CERT -o /efi/EFI/gentoo/bzImage.efi /efi/EFI/gentoo/bzImage.efi
-	    echo \"bzImage wurde gesigned \"
-            sbverify --cert $SECUREBOOT_SIGN_CERT /efi/EFI/gentoo/bzImage.efi
-        else
-            echo \"Das File /usr/src/linux/arch/x86_64/boot/bzImage existiert nicht.\"
-        fi
-        ;;
-
-     5)
-        echo "Kopiere Initramfs"
-	INITRAMFS=`ls -1v /boot/initramfs* | tail -n 1`
-        if [ -f $INITRAMFS ]; then
-            cp $INITRAMFS /efi/EFI/gentoo/initramfs.CPIO
-            echo \"$INITRAMFS wurde erfolgreich nach /efi/EFI/gentoo/initramfs.CPIO kopiert.\"
-        else
-            echo \"Das File initramfs-x.x.x-gentoo-x86_64.img existiert nicht.\"
-        fi
-	;;
-
-     6)
+     4)
         echo "Install grub"
 	# We need to export the public key so we can embed it in the GRUB executable.
 	echo \"Export GPG Key\"
