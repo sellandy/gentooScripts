@@ -1,0 +1,9 @@
+# Checken, ob signiert
+sbverify --list vmlinuz-6.18.6-gentoo-x86_64
+
+sbsign --cert /etc/ssl/private/secure_boot/db.crt --key /etc/ssl/private/secure_boot/priv.key -o vmlinuz-6.19.9-gentoo-x86_64 vmlinuz-6.19.9-gentoo-x86_64
+
+gpg -o /tmp/grub_gpg_public_key --export grub
+grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=gentoo --disable-shim-lock --pubkey=/tmp/grub_gpg_public_key --modules="pgp gcry_sha512 gcry_rsa"
+
+sign_file_for_grub
